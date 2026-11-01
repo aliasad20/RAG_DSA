@@ -6,6 +6,10 @@ const html = htm.bind(React.createElement);
 const API_BASE = (window.APP_CONFIG && window.APP_CONFIG.apiBase) || "";
 const ASK_TIMEOUT_MS = 90000;
 const WAKE_NOTICE_MS = 6000;
+const TYPE_INTERVAL_MS = 25;
+const TYPE_CHARS = 3;
+const TYPE_CATCH_UP = 100; // long answers start faster, so none takes more than a few seconds
+const REDUCED_MOTION = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
 const EXAMPLES = [
   "How does the tortoise and hare method find a cycle?",
@@ -38,21 +42,67 @@ function renderAnswer(text, sources, onPick) {
   });
 }
 
-async function askServer(question, onSlow) {
+// A half-revealed citation or bold marker stays hidden until the rest of it is on screen.
+function hideUnfinished(text) {
+  let out = text.replace(/\[\d*$/, "");
+  for (const marker of ["**", "`"]) {
+    if ((out.split(marker).length - 1) % 2) out = out.slice(0, out.lastIndexOf(marker));
+  }
+  return out;
+}
+
+// Groq can finish an answer in under a second, so the text is revealed at a readable pace.
+function useTypewriter(text) {
+  const [count, setCount] = useState(0);
+  useEffect(() => {
+    if (!text) { setCount(0); return; }
+    if (count >= text.length) return;
+    if (REDUCED_MOTION) { setCount(text.length); return; }
+    const timer = setTimeout(() => {
+      setCount((c) => Math.min(text.length, c + Math.max(TYPE_CHARS, Math.ceil((text.length - c) / TYPE_CATCH_UP))));
+    }, TYPE_INTERVAL_MS);
+    return () => clearTimeout(timer);
+  }, [text, count]);
+  return text.slice(0, count);
+}
+
+async function askServer(question, onEvent, onSlow, isStale) {
   const vector = await embedQuestion(question);
   const controller = new AbortController();
   const abort = setTimeout(() => controller.abort(), ASK_TIMEOUT_MS);
   const slow = setTimeout(onSlow, WAKE_NOTICE_MS);
   try {
-    const response = await fetch(`${API_BASE}/api/ask`, {
+    const response = await fetch(`${API_BASE}/api/ask/stream`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ question, vector }),
       signal: controller.signal,
     });
-    const data = await response.json().catch(() => ({}));
-    if (!response.ok) throw new Error(typeof data.detail === "string" ? data.detail : "The answer service had a problem.");
-    return data;
+    clearTimeout(slow);
+    if (!response.ok) {
+      const data = await response.json().catch(() => ({}));
+      throw new Error(typeof data.detail === "string" ? data.detail : "The answer service had a problem.");
+    }
+    const reader = response.body.getReader();
+    const decoder = new TextDecoder();
+    let buffer = "";
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) throw new Error("The answer was cut off. Please try again.");
+      if (isStale()) { // a newer search replaced this one, so stop using the LLM quota on it
+        controller.abort();
+        return null;
+      }
+      buffer += decoder.decode(value, { stream: true });
+      const events = buffer.split("\n\n");
+      buffer = events.pop();
+      for (const raw of events) {
+        const event = JSON.parse(raw.replace(/^data: /, ""));
+        if (event.error) throw new Error(event.error);
+        if (event.done) return event;
+        onEvent(event);
+      }
+    }
   } catch (error) {
     if (error.name === "AbortError" || error.name === "TypeError") {
       throw new Error("Couldn't reach the answer server. Finding moments still works, or try again in a minute.");
@@ -127,8 +177,20 @@ function App() {
       setProgress(null);
       let next;
       if (chosenMode === "answer") {
-        const onSlow = () => { if (id === runId.current) setState((s) => ({ ...s, waking: true })); };
-        const data = await askServer(question, onSlow);
+        const isStale = () => id !== runId.current;
+        const onSlow = () => { if (!isStale()) setState((s) => ({ ...s, waking: true })); };
+        const onEvent = (event) => {
+          if (isStale()) return;
+          setState((s) => ({
+            ...s,
+            waking: false,
+            grounded: true,
+            answer: (s.answer || "") + event.text,
+            moments: event.sources ? event.sources.map(sourceToMoment) : s.moments,
+          }));
+        };
+        const data = await askServer(question, onEvent, onSlow, isStale);
+        if (!data) return;
         next = { answer: data.answer, moments: data.sources.map(sourceToMoment), grounded: data.sources.length > 0 };
       } else {
         next = { moments: await search(question) };
@@ -163,6 +225,13 @@ function App() {
   const started = state.phase !== "idle";
   const moments = state.moments || [];
   const nothing = state.phase === "done" && !state.answer && moments.length === 0;
+  const fullAnswer = state.answer || "";
+  const typed = useTypewriter(fullAnswer);
+  const typing = busy || typed.length < fullAnswer.length;
+  const shownAnswer = typing ? hideUnfinished(typed) : fullAnswer;
+  // Numbered by first use, so the highest citation on screen says how many sources to list.
+  const citedSoFar = Math.max(0, ...[...shownAnswer.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1])));
+  const shownMoments = fullAnswer && typing ? moments.slice(0, citedSoFar) : moments;
 
   return html`<div className=${"page" + (started ? " started" : "")}>
     <header>
@@ -191,20 +260,20 @@ function App() {
       ${EXAMPLES.map((q) => html`<button type="button" key=${q} onClick=${() => run(q, mode)}>${q}</button>`)}
     </div>`}
 
-    ${busy && html`<p className="status" role="status">${
+    ${busy && !fullAnswer && html`<p className="status" role="status">${
       state.mode !== "answer" ? "Searching the lectures…"
       : state.waking ? "The answer server was asleep. Waking it can take up to a minute…"
       : "Writing an answer from the lectures…"}</p>`}
     ${state.phase === "error" && html`<p className="error" role="alert">${state.message}</p>`}
     ${nothing && html`<p className="status">Nothing in these lectures looks like a good match. Try describing it another way.</p>`}
 
-    ${state.answer && html`<section className=${"answer" + (state.grounded ? "" : " plain")}>
-      <p>${renderAnswer(state.answer, moments, setActive)}</p>
-      ${state.grounded && html`<p className="note">Written by AI from the lecture transcripts, which can contain errors. Check the sources.</p>`}
+    ${fullAnswer && html`<section className=${"answer" + (state.grounded ? "" : " plain") + (typing ? " typing" : "")} aria-busy=${typing}>
+      <p>${renderAnswer(shownAnswer, moments, setActive)}</p>
+      ${state.grounded && !typing && html`<p className="note">Written by AI from the lecture transcripts, which can contain errors. Check the sources.</p>`}
     </section>`}
 
-    ${moments.length > 0 && html`<div className="workspace">
-      <${MomentList} moments=${moments} active=${active} onPick=${setActive} query=${state.question} numbered=${Boolean(state.answer)} />
+    ${shownMoments.length > 0 && html`<div className="workspace">
+      <${MomentList} moments=${shownMoments} active=${active} onPick=${setActive} query=${state.question} numbered=${Boolean(state.answer)} />
       <aside className="watch"><${Player} moment=${active} /></aside>
     </div>`}
 

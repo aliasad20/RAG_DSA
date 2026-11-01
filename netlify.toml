@@ -1,0 +1,4 @@
+# The website has no build step. Netlify serves frontend/ as it is.
+[build]
+  base = "frontend"
+  publish = "."

@@ -6,11 +6,13 @@ The browser sends the question plus its embedding, so this server needs no AI
 model and fits a small free host. It holds the Groq and Qdrant keys.
 """
 
+import json
 import time
 from collections import defaultdict, deque
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import StreamingResponse
 from pydantic import BaseModel, Field
 
 from ytrag.config import (
@@ -21,6 +23,7 @@ from ytrag.config import (
     GROQ_API_KEY,
 )
 from ytrag.rag import ask as rag_ask
+from ytrag.rag import ask_stream as rag_ask_stream
 from ytrag.store import chunk_count
 
 MAX_QUESTION_CHARS = 300
@@ -80,3 +83,20 @@ def ask(body: AskBody, request: Request) -> dict:
     except Exception as exc:  # provider outage, quota, bad key: never show details to visitors
         print(f"[ask] failed: {exc}")
         raise HTTPException(502, "The answer service is unavailable right now. Search still works.") from exc
+
+
+@app.post("/api/ask/stream")
+def ask_stream(body: AskBody, request: Request) -> StreamingResponse:
+    if not GROQ_API_KEY:
+        raise HTTPException(503, "Written answers aren't switched on here. Search still works.")
+    _check_rate_limit(request)
+
+    def events():
+        try:
+            for event in rag_ask_stream(body.question, vector=body.vector):
+                yield f"data: {json.dumps(event, ensure_ascii=False)}\n\n"
+        except Exception as exc:  # the response has started, so report it inside the stream
+            print(f"[ask/stream] failed: {exc}")
+            yield f'data: {json.dumps({"error": "The answer service is unavailable right now. Search still works."})}\n\n'
+
+    return StreamingResponse(events(), media_type="text/event-stream", headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})

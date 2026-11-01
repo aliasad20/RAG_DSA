@@ -1,5 +1,6 @@
 """Run from the project root: .venv/bin/python -m unittest discover tests"""
 
+import json
 import unittest
 from unittest import mock
 
@@ -135,6 +136,50 @@ class AskGuardTests(unittest.TestCase):
         self.assertEqual(len(result["sources"]), 1)
 
 
+class AskStreamTests(unittest.TestCase):
+    def stream(self, hits, pieces):
+        with mock.patch.object(rag, "search", return_value=hits), \
+             mock.patch.object(rag, "_llm_stream", return_value=iter(pieces)) as llm:
+            return list(rag.ask_stream("question")), llm
+
+    def typed(self, events):
+        return "".join(e.get("text", "") for e in events)
+
+    def test_typed_text_matches_the_checked_answer(self):
+        events, _ = self.stream([hit(1), hit(2), hit(3)], ["First [", "3], again", " [3], then", " [1", "]."])
+        self.assertEqual(self.typed(events), "First [1], again [1], then [2].")
+        self.assertEqual(events[-1]["answer"], "First [1], again [1], then [2].")
+        self.assertEqual([s["title"] for s in events[-1]["sources"]], ["Video 3", "Video 1"])
+
+    def test_source_arrives_before_or_with_its_citation(self):
+        events, _ = self.stream([hit(1), hit(2)], ["One [2] ", "and more ", "two [1]."])
+        known = 0
+        for event in events[:-1]:
+            known = len(event.get("sources", [])) or known
+            cited = [int(n) for n in rag._CITATION.findall(event["text"])]
+            self.assertLessEqual(max(cited, default=0), known)
+        self.assertEqual(known, 2)
+
+    def test_citation_styles_split_across_pieces(self):
+        events, _ = self.stream([hit(1), hit(2)], ["One", "【", "2†L", "1】 two ", "【1】."])
+        self.assertEqual(self.typed(events), "One [1] two [2].")
+
+    def test_array_index_split_across_pieces_is_kept(self):
+        events, _ = self.stream([hit(1), hit(2)], ["Set arr", "[2", "] to zero [", "1]."])
+        self.assertEqual(self.typed(events), "Set arr[2] to zero [1].")
+
+    def test_refusal_and_uncited_reply_are_never_typed(self):
+        for pieces in ([REFUSAL[:9], REFUSAL[9:]], ["Trust me, ", "this works."]):
+            events, _ = self.stream([hit(1)], pieces)
+            self.assertEqual(self.typed(events), "")
+            self.assertEqual(events[-1], {"done": True, "answer": REFUSAL, "sources": []})
+
+    def test_refuses_without_calling_llm_when_scores_are_low(self):
+        events, llm = self.stream([hit(1, score=0.1)], [])
+        self.assertEqual(events, [{"done": True, "answer": REFUSAL, "sources": []}])
+        llm.assert_not_called()
+
+
 class ExportTests(unittest.TestCase):
     def test_quantize_keeps_range_and_values(self):
         out = quantize(np.array([[1.0, -1.0, 0.5, 0.0]], dtype=np.float32))
@@ -212,3 +257,29 @@ class EvaluateTests(unittest.TestCase):
 
 if __name__ == "__main__":
     unittest.main()
+
+    def stream(self, reply):
+        with mock.patch.object(api, "GROQ_API_KEY", "set"), mock.patch.object(api, "rag_ask_stream", reply), mock.patch("builtins.print"):
+            return self.client.post("/api/ask/stream", json={"question": "q", "vector": self.vector})
+
+    def test_stream_sends_events(self):
+        response = self.stream(lambda *a, **k: iter([{"text": "Hi [1]"}, {"done": True, "answer": "Hi [1]", "sources": []}]))
+        self.assertEqual(response.status_code, 200)
+        self.assertTrue(response.headers["content-type"].startswith("text/event-stream"))
+        events = [json.loads(line[6:]) for line in response.text.split("\n\n") if line]
+        self.assertEqual(events[0], {"text": "Hi [1]"})
+        self.assertTrue(events[-1]["done"])
+
+    def test_stream_failure_hides_details(self):
+        def fail(*a, **k):
+            yield {"text": "Hi"}
+            raise RuntimeError("secret detail")
+        response = self.stream(fail)
+        self.assertNotIn("secret", response.text)
+        self.assertIn('"error"', response.text)
+
+    def test_stream_shares_the_rate_limit(self):
+        reply = lambda *a, **k: iter([])
+        for _ in range(api.ASK_LIMIT_PER_HOUR):
+            self.assertEqual(self.stream(reply).status_code, 200)
+        self.assertEqual(self.stream(reply).status_code, 429)

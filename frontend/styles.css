@@ -96,6 +96,8 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .answer p { margin: 0; }
 .answer code { padding: 1px 4px; font-size: 0.9em; background: var(--thumb); border-radius: 4px; }
 .answer .note { margin-top: 10px; font-size: 0.82rem; color: var(--muted); }
+.answer.typing p::after { content: ""; display: inline-block; width: 2px; height: 1em; margin-left: 2px; vertical-align: -0.12em; background: var(--accent); animation: blink 1s steps(2, start) infinite; }
+@keyframes blink { to { visibility: hidden; } }
 .cite {
   display: inline-block;
   min-width: 1.45em;
