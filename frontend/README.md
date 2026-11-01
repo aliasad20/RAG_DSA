@@ -1,5 +1,5 @@
 ---
-title: Lecture Search
+title: DSA Lecture RAG
 emoji: 🎓
 colorFrom: red
 colorTo: yellow

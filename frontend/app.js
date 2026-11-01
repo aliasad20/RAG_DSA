@@ -19,6 +19,21 @@ const EXAMPLES = [
   "sliding window ka template kya hota hai",
 ];
 
+const COURSE_URL = "https://www.youtube.com/playlist?list=PLgUwDviBIf0oF6QL8m22w1hIDC1vJ_BHz";
+const REPO_URL = "https://github.com/aliasad20/RAG_DSA";
+
+const STATS = [
+  ["315", "lectures"],
+  ["114", "hours of video"],
+  ["8,995", "searchable moments"],
+];
+
+const STEPS = [
+  ["Ask in your own words", "Search by meaning, not exact keywords. Describe the idea the way you would ask a friend, in English or Hinglish."],
+  ["Jump to the moment", "Results open in a player beside the text, right where the idea is explained, so there's no scrubbing through an hour of video."],
+  ["Or read a short answer", "Get a written answer drawn only from the lectures, with citations you can click. If the lectures don't cover it, it says so."],
+];
+
 const STOP_WORDS = new Set(["what", "when", "where", "which", "does", "from", "that", "this", "with", "have", "kaise", "kyun", "hota", "hain"]);
 
 function highlight(text, query) {
@@ -193,6 +208,21 @@ function App() {
     return () => window.removeEventListener("keydown", onKey);
   }, []);
 
+  function goHome() {
+    runId.current += 1; // drop any answer still on its way
+    setState({ phase: "idle" });
+    setQuery("");
+    setActive(null);
+    history.replaceState(null, "", location.pathname);
+    window.scrollTo(0, 0);
+  }
+
+  function showHow(e) {
+    e.preventDefault();
+    if (state.phase !== "idle") goHome();
+    requestAnimationFrame(() => document.getElementById("how")?.scrollIntoView());
+  }
+
   function chooseMode(next) {
     setMode(next);
     if (state.phase === "done" && state.question === query.trim() && state.mode !== next) run(query, next);
@@ -210,8 +240,30 @@ function App() {
   const citedSoFar = Math.max(0, ...[...shownAnswer.matchAll(CITATION)].map((m) => Number(m[1])));
   const shownMoments = fullAnswer && typing ? moments.slice(0, citedSoFar) : moments;
 
-  return html`<div className=${"page" + (started ? " started" : "")}>
+  return html`<${React.Fragment}>
+  <nav className="topbar" aria-label="Main">
+    <div className="topbar-inner">
+      <a className="brand" href="./" onClick=${(e) => { e.preventDefault(); goHome(); }}>
+        <svg className="brand-mark" viewBox="0 0 32 32" aria-hidden="true">
+          <rect width="32" height="32" rx="9" fill="currentColor"></rect>
+          <path d="M12.5 9.5v9l7.5-4.5z" fill="var(--accent-ink)"></path>
+          <rect x="7" y="22.5" width="18" height="2.5" rx="1.25" fill="var(--accent-ink)" opacity="0.45"></rect>
+          <rect x="7" y="22.5" width="8" height="2.5" rx="1.25" fill="var(--accent-ink)"></rect>
+        </svg>
+        <span>DSA Lecture RAG</span>
+      </a>
+      <div className="topbar-links">
+        <a href="#how" onClick=${showHow}>How it works</a>
+        <a href=${COURSE_URL} target="_blank" rel="noopener">The course</a>
+        <a className="topbar-cta" href=${REPO_URL} target="_blank" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <div className=${"page" + (started ? " started" : "")}>
+    <div className="hero-glow" aria-hidden="true"></div>
     <header>
+      <p className="eyebrow">Search inside the videos, not just the titles</p>
       <h1>Find the moment it was explained.</h1>
       <p className="intro">Search what is said across 315 DSA lectures, 114 hours in all, and jump straight to that point in the video.</p>
     </header>
@@ -237,6 +289,21 @@ function App() {
       ${EXAMPLES.map((q) => html`<button type="button" key=${q} onClick=${() => run(q, mode)}>${q}</button>`)}
     </div>`}
 
+    ${!started && html`<dl className="stats">
+      ${STATS.map(([value, label]) => html`<div key=${label}><dd>${value}</dd><dt>${label}</dt></div>`)}
+    </dl>`}
+
+    ${!started && html`<section className="how" id="how" aria-labelledby="how-title">
+      <h2 id="how-title">How it works</h2>
+      <ol>
+        ${STEPS.map(([title, text], i) => html`<li key=${title}>
+          <span className="step-num" aria-hidden="true">${i + 1}</span>
+          <h3>${title}</h3>
+          <p>${text}</p>
+        </li>`)}
+      </ol>
+    </section>`}
+
     ${busy && !fullAnswer && html`<p className="status" role="status">${
       state.mode !== "answer" ? "Searching the lectures…"
       : state.waking ? "The answer server was asleep. Waking it can take up to a minute…"
@@ -259,7 +326,8 @@ function App() {
       Search runs in your browser. Written answers send your question to this project's server and to Groq.
       Lectures belong to their creator, from the Strivers A2Z DSA Course on YouTube. An independent student project, not affiliated with the course.
     </footer>
-  </div>`;
+  </div>
+  <//>`;
 }
 
 ReactDOM.createRoot(document.getElementById("root")).render(html`<${App} />`);

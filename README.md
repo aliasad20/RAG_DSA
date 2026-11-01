@@ -8,7 +8,7 @@ The approach follows the public walkthrough ["I converted my 60 Hour DSA Playlis
 
 - **Offline, on a GPU machine:** yt-dlp downloads audio → Whisper large-v3 transcribes it with timestamps → transcripts are cut into 60 s overlapping chunks → all-MiniLM-L6-v2 embeds them.
 - **Search, in the visitor's browser:** the same model runs in the page through Transformers.js and compares the question against a 3.5 MB vector file. No server is involved.
-- **Written answers, on a small server:** the browser sends the question and its embedding. FastAPI finds the closest chunks in Qdrant and asks an LLM on Groq to answer only from them, with citations.
+- **Written answers, on a small server:** the browser sends the question and its embedding. FastAPI finds the closest chunks in Qdrant and streams an answer from an LLM on Groq that may use only those chunks. Nothing is shown until the first valid citation, and an answer without one is refused.
 
 The server holds the API keys and needs no AI model, so it fits a free host at about 115 MB of memory.
 
@@ -50,21 +50,16 @@ python -m http.server 8080 --directory frontend        # website at http://127.0
 
 1. Put this project in a GitHub repository.
 2. In [Render](https://dashboard.render.com), choose **New → Blueprint** and select the repository. It reads `render.yaml`.
-3. Fill in `QDRANT_URL`, `QDRANT_API_KEY` and `GROQ_API_KEY`, and set `ALLOWED_ORIGINS` to the website's address, such as `https://your-name-your-space.static.hf.space`.
+3. Fill in `QDRANT_URL`, `QDRANT_API_KEY` and `GROQ_API_KEY`, and set `ALLOWED_ORIGINS` to the website's address, such as `https://your-project.netlify.app`.
 4. Check that `https://YOUR-SERVICE.onrender.com/api/ping` shows the chunk count.
 5. In the GitHub repository's **Settings → Secrets and variables → Actions → Variables**, add `ANSWER_SERVER_URL` with the Render address. A weekly job then touches the database, because free Qdrant clusters are suspended after a week without use.
 
-**Website on a Static Hugging Face Space**
+**Website on Netlify**
 
-1. Set `apiBase` in `frontend/config.js` to the Render address.
-2. Log in and upload:
+1. Set `apiBase` in `frontend/config.js` to the Render address and push.
+2. In [Netlify](https://app.netlify.com), choose **Add new project → Import an existing project** and select the repository. It reads `netlify.toml`, which publishes `frontend/` with no build step.
 
-```bash
-.venv/bin/hf auth login
-.venv/bin/hf upload YOUR-NAME/YOUR-SPACE frontend . --repo-type=space
-```
-
-The free Render server sleeps after 15 minutes without traffic and takes about a minute to wake. Search keeps working meanwhile.
+The free Render server sleeps after 15 minutes without traffic and takes about a minute to wake. Search keeps working meanwhile. Netlify's free plan pauses all of an account's projects once its monthly credits run out.
 
 ## Content
 

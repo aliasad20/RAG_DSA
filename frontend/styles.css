@@ -34,22 +34,67 @@ body {
   font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
 }
 
-.page { max-width: 1240px; margin: 0 auto; padding: 12vh 24px 40px; }
-.page.started { padding-top: 32px; }
+.topbar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background: color-mix(in srgb, var(--bg) 82%, transparent);
+  border-bottom: 1px solid var(--line);
+  -webkit-backdrop-filter: saturate(160%) blur(12px);
+  backdrop-filter: saturate(160%) blur(12px);
+}
+.topbar-inner { display: flex; align-items: center; justify-content: space-between; gap: 16px; max-width: 1240px; height: 62px; margin: 0 auto; padding: 0 24px; }
+.brand, .topbar-links a, .eyebrow { white-space: nowrap; }
+.brand { display: inline-flex; align-items: center; gap: 10px; color: var(--ink); font: 700 1.14rem/1 Georgia, "Times New Roman", serif; letter-spacing: -0.01em; text-decoration: none; }
+.brand-mark { flex: none; width: 30px; height: 30px; color: var(--accent); }
+.topbar-links { display: flex; align-items: center; gap: 6px; font-size: 0.92rem; }
+.topbar-links a { padding: 7px 12px; color: var(--muted); border-radius: 8px; text-decoration: none; transition: color 0.15s, background-color 0.15s; }
+.topbar-links a:hover { color: var(--ink); background: var(--thumb); }
+.topbar-links .topbar-cta { margin-left: 6px; color: var(--ink); border: 1px solid var(--line); font-weight: 600; }
+
+.page { position: relative; max-width: 1240px; margin: 0 auto; padding: 9vh 24px 40px; }
+.page.started { padding-top: 24px; }
+
+/* A soft wash of the accent colour behind the landing page's headline. */
+.hero-glow {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: -1;
+  height: 520px;
+  background: radial-gradient(52% 62% at 50% 0%, var(--accent-soft), transparent 100%);
+  pointer-events: none;
+}
+.started .hero-glow { display: none; }
 
 header, .search, .controls, .examples { max-width: 720px; }
 .page:not(.started) header, .page:not(.started) .search,
 .page:not(.started) .controls, .page:not(.started) .examples { margin-left: auto; margin-right: auto; }
+.page:not(.started) header { text-align: center; }
+.page:not(.started) .controls, .page:not(.started) .examples { justify-content: center; }
 
+.eyebrow { display: inline-block; margin: 0 0 18px; padding: 5px 13px; color: var(--accent); background: var(--surface); border: 1px solid var(--line); border-radius: 999px; font-size: 0.84rem; font-weight: 600; }
 h1 {
   margin: 0;
-  font: 700 clamp(2.1rem, 6vw, 3.2rem)/1.08 Georgia, "Times New Roman", serif;
-  letter-spacing: -0.02em;
+  font: 700 clamp(2.3rem, 6.4vw, 3.9rem)/1.06 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.025em;
 }
-.intro { margin: 14px 0 30px; color: var(--muted); font-size: 1.08rem; }
-.started h1 { font-size: 1.45rem; }
-.started .intro { display: none; }
-.started header { margin-bottom: 14px; }
+.intro { margin: 18px auto 32px; max-width: 580px; color: var(--muted); font-size: 1.12rem; }
+/* The top bar names the site once results are showing, so the headline steps aside. */
+.started header { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); max-width: 720px; margin: 52px auto 0; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.stats > div { display: flex; flex-direction: column; gap: 2px; padding: 18px 12px; text-align: center; }
+.stats > div + div { border-left: 1px solid var(--line); }
+.stats dd { order: -1; margin: 0; font: 700 1.9rem/1.1 Georgia, "Times New Roman", serif; letter-spacing: -0.02em; font-variant-numeric: tabular-nums; }
+.stats dt { color: var(--muted); font-size: 0.86rem; }
+
+.how { max-width: 1040px; margin: 76px auto 0; scroll-margin-top: 86px; }
+.how h2 { margin: 0 0 22px; font: 700 clamp(1.5rem, 3.4vw, 2rem)/1.2 Georgia, "Times New Roman", serif; letter-spacing: -0.015em; text-align: center; }
+.how ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 16px; margin: 0; padding: 0; list-style: none; }
+.how li { padding: 22px; background: var(--surface); border: 1px solid var(--line); border-radius: 14px; }
+.step-num { display: grid; place-items: center; width: 30px; height: 30px; color: var(--accent); background: var(--accent-soft); border-radius: 9px; font-weight: 700; font-size: 0.92rem; }
+.how h3 { margin: 14px 0 6px; font-size: 1.04rem; line-height: 1.3; }
+.how p { margin: 0; color: var(--muted); font-size: 0.93rem; line-height: 1.5; }
 
 button { font: inherit; color: inherit; cursor: pointer; }
 :focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
@@ -65,6 +110,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border: 1px solid var(--line);
   border-radius: 10px;
 }
+.page:not(.started) .search input { box-shadow: 0 6px 24px -14px rgba(0, 0, 0, 0.35); }
 .primary {
   padding: 0 24px;
   color: var(--accent-ink);
@@ -73,7 +119,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
   border-radius: 10px;
   font-weight: 600;
 }
-.primary:disabled { opacity: 0.55; cursor: default; }
+.primary:disabled { opacity: 0.75; cursor: default; }
 
 .controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 12px; }
 .tabs { display: inline-flex; padding: 3px; background: var(--thumb); border-radius: 9px; }
@@ -137,7 +183,7 @@ button { font: inherit; color: inherit; cursor: pointer; }
 .results { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 28px; align-items: start; margin-top: 24px; }
 .results.solo { grid-template-columns: minmax(0, 820px); }
 .results-main { min-width: 0; }
-.watch { position: sticky; top: 20px; min-width: 0; }
+.watch { position: sticky; top: 82px; min-width: 0; }
 
 .answer + .moments { margin-top: 14px; }
 .moments { list-style: none; margin: 0; padding: 0; }
@@ -165,9 +211,12 @@ mark { color: inherit; background: var(--accent-soft); border-radius: 2px; }
 .open { font-size: 0.88rem; color: var(--accent); }
 
 footer { margin-top: 64px; max-width: 720px; color: var(--muted); font-size: 0.8rem; }
-.page:not(.started) footer { margin-left: auto; margin-right: auto; }
+.page:not(.started) footer { margin-left: auto; margin-right: auto; text-align: center; }
 
 @media (max-width: 860px) {
+  .how ol { grid-template-columns: minmax(0, 1fr); }
+  /* Only the video sticks on small screens, so the two don't stack up. */
+  .topbar { position: static; }
   .results, .results.solo { grid-template-columns: minmax(0, 1fr); gap: 14px; }
   /* The video stays at the top of the screen while the answer and links scroll under it. */
   .watch { top: 0; order: -1; z-index: 2; background: var(--bg); }
@@ -176,8 +225,24 @@ footer { margin-top: 64px; max-width: 720px; color: var(--muted); font-size: 0.8
   .now-title { margin-top: 6px; font-size: 0.88rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 }
 
+@media (max-width: 360px) {
+  .topbar-links a[href="#how"] { display: none; }
+}
+
 @media (max-width: 480px) {
-  .page { padding: 32px 16px; }
+  .page { padding: 36px 16px 32px; }
+  .topbar-inner { height: 56px; padding: 0 16px; gap: 8px; }
+  .brand { font-size: 1rem; gap: 8px; }
+  .brand-mark { width: 26px; height: 26px; }
+  .topbar-links { gap: 0; font-size: 0.84rem; }
+  .topbar-links a { padding: 6px 7px; }
+  .topbar-links .topbar-cta { margin-left: 3px; }
+  .topbar-links a[target]:not(.topbar-cta) { display: none; } /* no room for the course link on a phone */
+  .eyebrow { padding: 4px 11px; font-size: 0.74rem; }
+  .tabs button { padding: 5px 10px; font-size: 0.82rem; white-space: nowrap; }
+  .stats dd { font-size: 1.5rem; }
+  .stats > div { padding: 14px 6px; }
+  .stats dt { font-size: 0.76rem; }
   .thumb { width: 112px; }
   .primary { padding: 0 16px; }
 }
