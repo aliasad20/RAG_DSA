@@ -1,0 +1,17 @@
+# GPU PyTorch for a CUDA 12.x driver. Pinned: the default PyPI build needs CUDA 13.
+--extra-index-url https://download.pytorch.org/whl/cu128
+torch==2.11.0+cu128
+yt-dlp
+faster-whisper
+av<16  # faster-whisper 1.2 passes an argument newer PyAV removed
+nvidia-cublas-cu12
+nvidia-cudnn-cu12>=9,<10
+sentence-transformers
+qdrant-client
+groq
+google-genai
+python-dotenv
+typer
+rich
+fastapi
+uvicorn

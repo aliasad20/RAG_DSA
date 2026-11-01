@@ -1,0 +1,12 @@
+# Free Qdrant clusters are suspended after a week without use, so touch it weekly.
+# Set the repository variable ANSWER_SERVER_URL to the Render address.
+name: Keep answer database awake
+on:
+  schedule:
+    - cron: "0 6 * * 1"
+  workflow_dispatch:
+jobs:
+  ping:
+    runs-on: ubuntu-latest
+    steps:
+      - run: curl --fail --silent --show-error --max-time 180 "${{ vars.ANSWER_SERVER_URL }}/api/ping"

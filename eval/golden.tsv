@@ -1,0 +1,69 @@
+# question<TAB>accepted video ids (comma separated). Labels are at video level.
+How do I find the largest sum of a contiguous part of an array?	AHZpyENo7k4
+Which value occurs more than n/2 times, using a voting idea?	nP_ns3uSh80
+How do I get the next lexicographically greater arrangement of an array?	JDOXKqF60RQ
+How do I count pairs where an earlier number is larger than a later one using merge sort?	AseUmwVNaoY
+Given a list of time ranges, how do I combine the ones that clash?	IexN60k62jo
+What is the Dutch national flag algorithm?	tp8JIuCXBaU
+How many subarrays have xor equal to a given target?	eZr-6p0B7ME
+How do I compute the gcd of two numbers quickly?	1xNbjMdbjug
+How do I work out big O of nested loops?	FPu9Uld7W-E
+How does partitioning around a pivot sort an array?	WIrA4YexLRQ
+What is the minimum eating speed to finish all piles within h hours?	qyfekrNni90
+Place stalls so that the minimum distance between them is as large as possible	R_Mfw4ew-Vo
+Give books to students so the maximum pages anyone reads is minimised	Z0hwjftStI4,thUd_WJn6wk
+How do I find an integer square root without a library function?	Bsv3FPUX_BA
+How do I look for a target in a sorted array that has been pivoted?	5qGrJbHhqFs,w2G2W8l__pc
+What is the smallest index whose value is at least x?	6zhGS79oQ4k
+What is the least weight capacity of a conveyor belt to deliver everything in time?	MG-Ac4TAvTY
+How do I get the middle value of two sorted arrays in logarithmic time?	F9c7LpRZWVQ,C2rRzz-JDk8
+How does the tortoise and hare method spot a cycle in a list of nodes?	wiOo4DC5GGA,2Kd0KKmmHFc,I4g1qbkTPus
+How do I deep copy a list whose nodes have an extra arbitrary pointer?	q570bKdrnlw
+How do I flip the order of every k consecutive nodes?	lIar1skcQYI
+Design a cache that evicts the entry unused for the longest time	z9bJUPxzFOw
+Design a cache that evicts the entry used the fewest times	mzqHlAW7jeE
+Two lists merge at a common node, how do I find that node?	0DYoPz2Tpt4
+What is the biggest rectangle that fits under a bar chart?	Bzat9vgD0fs,ttVu6G7Ayik
+How much water can be held between bars after it rains?	1_5VuquLbXg
+How does a monotonic stack find the next larger number to the right?	e7XQLtOQM3I,7PrncD7v9YQ
+How can a stack return its smallest value in constant time?	NdDIaH91P0g
+Find the person everyone knows but who knows nobody	cEadsbTeze4
+How do I get the largest value of every window of size k with a deque?	NwBvene4Imo
+How do I convert an infix expression to postfix?	4pIc9UBHJtk
+What is the smallest substring containing all characters of another string?	WJaij9ffOIY
+What is the longest run of letters with no letter repeated?	-zSxTJkcdAo
+What is the longest run of ones if I may flip at most k zeros?	3E4JBHSLpYk
+How many platforms does a station need so that no train has to wait?	AsGzwR_FWok
+What is the fewest hops needed to reach the end of an array?	7SBVnw7GSTk
+How do I maximise profit when each task has a deadline and takes one unit of time?	QbwltemZbRg
+How do I pick items by value to weight ratio when parts of an item are allowed?	1ibsQrnuEEg
+What is the longest path between any two nodes of a tree?	Rezetez59Nk
+How do I do an inorder walk of a tree with O(1) extra space using threads?	80Zug6D1_r4
+What is the lowest shared parent of two nodes in a tree?	_-QHfMDde90,cX_kPV_foZc
+How do I turn a tree into a string and rebuild it from that string?	-YbXySKJsX8
+How long does fire take to spread through a whole tree from one node?	2r5wLmQfD6g
+Two nodes of a search tree were swapped by mistake, how do I fix it?	ZWGW7FminDM
+What is the highest total of node values along any path in a tree?	WszrfSwMz58
+Single source shortest paths when edges can have negative weights	0vVofAhAYjc
+Shortest paths between every pair of vertices	YbY8cVwWAvw
+Which edges disconnect a graph when removed?	qrAub5z8FeA
+Work out the letter order of an unknown language from a sorted word list	U3N_je7tWAs
+What are union by rank and path compression?	aBxjDBC4M1U
+Build a minimum spanning tree by sorting edges by weight	DMnDM_sxVig
+How does rot spread across a grid using multi source BFS?	yf3oUhkvqA0
+How do I colour a graph with two colours so that no neighbours match?	-vu34sct1g8,KG5YFfR0j8A
+Why use a priority queue rather than a normal queue for shortest paths?	3dINsjyfooY
+What is the cheapest flight with a limit on the number of stops?	9XybHVqTHcQ
+In how many ways can I reach the top taking one or two steps at a time?	mLfjzJsN8us
+Stealing from houses arranged in a circle without touching neighbours	3WaxQMELSkw
+Fewest insert, delete and replace operations to turn one word into another	fJaKO8FbDdo
+Maximum stock profit when I must wait a day after selling	IGIe46xw3YY
+What is the cheapest way to multiply a sequence of matrices?	vRVfmbCFW7Y,pDCXsbAw5Cg
+Popping balloons to collect the most coins	Yz4LlDSlkns
+Matching a pattern containing question marks and stars against a string	ZmlQ3vgAOMo
+What is the smallest number of coins that make up an amount?	myPeWb3Y68A
+What is the difference between memoization and tabulation?	tyB0ztf0DNY
+sliding window ka template kya hota hai	9kdHxplyl5I
+binary search kaise kaam karta hai	MHf6awe89xw
+recursion mein stack overflow kyu hota hai	yVdKa8dnKiE
+graph mein cycle kaise detect kare	BPlrALf1LDU,zQ3zgFypzX4,9twcmtQj4DU,iTBaI90lpDQ

@@ -1,0 +1,12 @@
+How do React hooks work?
+What is a Kubernetes pod?
+How does photosynthesis work?
+What is the capital of Australia?
+How do I train a convolutional neural network in PyTorch?
+What is the difference between inner join and left join in SQL?
+How do Python decorators work?
+What is quantum entanglement?
+How do I cook chicken biryani?
+Explain the TCP three way handshake
+How does CSS flexbox align items?
+What caused the French Revolution?

@@ -1,0 +1,153 @@
+:root {
+  color-scheme: light dark;
+  --bg: #fbfaf7;
+  --surface: #ffffff;
+  --ink: #1c1b19;
+  --muted: #68655d;
+  --line: #e4e1d9;
+  --accent: #b4381e;
+  --accent-ink: #ffffff;
+  --accent-soft: #f8e9e4;
+  --thumb: #e9e6de;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --bg: #171614;
+    --surface: #211f1c;
+    --ink: #f0ede6;
+    --muted: #a5a197;
+    --line: #36332e;
+    --accent: #ee7f62;
+    --accent-ink: #1c1b19;
+    --accent-soft: #3a2620;
+    --thumb: #2b2925;
+  }
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font: 16px/1.55 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+}
+
+.page { max-width: 1120px; margin: 0 auto; padding: 12vh 24px 40px; }
+.page.started { padding-top: 32px; }
+
+header, .search, .controls, .examples { max-width: 720px; }
+.page:not(.started) header, .page:not(.started) .search,
+.page:not(.started) .controls, .page:not(.started) .examples { margin-left: auto; margin-right: auto; }
+
+h1 {
+  margin: 0;
+  font: 700 clamp(2.1rem, 6vw, 3.2rem)/1.08 Georgia, "Times New Roman", serif;
+  letter-spacing: -0.02em;
+}
+.intro { margin: 14px 0 30px; color: var(--muted); font-size: 1.08rem; }
+.started h1 { font-size: 1.45rem; }
+.started .intro { display: none; }
+.started header { margin-bottom: 14px; }
+
+button { font: inherit; color: inherit; cursor: pointer; }
+:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+.search { display: flex; gap: 8px; }
+.search input {
+  flex: 1;
+  min-width: 0;
+  padding: 14px 16px;
+  font: inherit;
+  color: inherit;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+}
+.primary {
+  padding: 0 24px;
+  color: var(--accent-ink);
+  background: var(--accent);
+  border: 0;
+  border-radius: 10px;
+  font-weight: 600;
+}
+.primary:disabled { opacity: 0.55; cursor: default; }
+
+.controls { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 18px; margin-top: 12px; }
+.tabs { display: inline-flex; padding: 3px; background: var(--thumb); border-radius: 9px; }
+.tabs button { padding: 5px 13px; font-size: 0.9rem; color: var(--muted); background: none; border: 0; border-radius: 7px; }
+.tabs button[aria-pressed="true"] { color: var(--ink); background: var(--surface); font-weight: 600; }
+
+.prep { display: flex; align-items: center; gap: 10px; color: var(--muted); font-size: 0.84rem; }
+.bar { width: 90px; height: 5px; background: var(--line); border-radius: 3px; overflow: hidden; }
+.bar span { display: block; height: 100%; background: var(--accent); }
+
+.examples { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 24px; }
+.examples button { padding: 6px 13px; background: transparent; border: 1px solid var(--line); border-radius: 999px; font-size: 0.88rem; }
+.examples button:hover { border-color: var(--accent); }
+
+.status { margin-top: 28px; color: var(--muted); }
+.error { margin-top: 28px; padding: 12px 14px; background: var(--accent-soft); border-radius: 10px; max-width: 720px; }
+
+.answer { margin-top: 24px; padding: 18px 20px; max-width: 820px; background: var(--surface); border: 1px solid var(--line); border-left: 3px solid var(--accent); border-radius: 10px; }
+.answer.plain { border-left-color: var(--line); color: var(--muted); }
+.answer p { margin: 0; }
+.answer code { padding: 1px 4px; font-size: 0.9em; background: var(--thumb); border-radius: 4px; }
+.answer .note { margin-top: 10px; font-size: 0.82rem; color: var(--muted); }
+.cite {
+  display: inline-block;
+  min-width: 1.45em;
+  margin: 0 2px;
+  padding: 0 4px;
+  color: var(--accent);
+  background: var(--accent-soft);
+  border: 0;
+  border-radius: 5px;
+  font-size: 0.8em;
+  font-weight: 700;
+  line-height: 1.5;
+}
+
+.workspace { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr); gap: 32px; align-items: start; margin-top: 24px; }
+.watch { position: sticky; top: 20px; }
+
+.moments { list-style: none; margin: 0; padding: 0; }
+.moments li + li { border-top: 1px solid var(--line); }
+.moment { display: flex; gap: 14px; width: 100%; padding: 13px 8px; text-align: left; background: none; border: 0; border-radius: 10px; }
+.moment:hover { background: var(--surface); }
+.moment.active { background: var(--accent-soft); }
+
+.thumb { position: relative; flex: none; width: 148px; aspect-ratio: 16 / 9; background: var(--thumb); border-radius: 7px; overflow: hidden; }
+.thumb img { display: block; width: 100%; height: 100%; object-fit: cover; }
+.time { position: absolute; right: 5px; bottom: 5px; padding: 0 5px; color: #fff; background: rgba(0, 0, 0, 0.8); border-radius: 4px; font-size: 0.78rem; font-weight: 600; font-variant-numeric: tabular-nums; }
+
+.moment-text { min-width: 0; }
+.title { display: block; font-weight: 600; line-height: 1.3; }
+.moment.active .title { color: var(--accent); }
+.num { display: inline-block; min-width: 1.4em; margin-right: 6px; color: var(--accent); background: var(--accent-soft); border-radius: 5px; font-size: 0.8em; text-align: center; }
+.preview { display: -webkit-box; margin-top: 5px; color: var(--muted); font-size: 0.88rem; line-height: 1.4; overflow: hidden; -webkit-box-orient: vertical; -webkit-line-clamp: 3; }
+mark { color: inherit; background: var(--accent-soft); border-radius: 2px; }
+
+.player { aspect-ratio: 16 / 9; background: #000; border-radius: 12px; overflow: hidden; }
+.player iframe { display: block; width: 100%; height: 100%; border: 0; }
+.player-empty { display: grid; place-items: center; aspect-ratio: 16 / 9; color: var(--muted); border: 1px dashed var(--line); border-radius: 12px; }
+.player-empty p { margin: 0; }
+.now-title { margin: 12px 0 2px; font-weight: 600; }
+.open { font-size: 0.88rem; color: var(--accent); }
+
+footer { margin-top: 64px; max-width: 720px; color: var(--muted); font-size: 0.8rem; }
+.page:not(.started) footer { margin-left: auto; margin-right: auto; }
+
+@media (max-width: 860px) {
+  .workspace { grid-template-columns: minmax(0, 1fr); gap: 14px; }
+  .watch { position: static; order: -1; }
+  .player-empty { display: none; }
+}
+
+@media (max-width: 480px) {
+  .page { padding: 32px 16px; }
+  .thumb { width: 112px; }
+  .primary { padding: 0 16px; }
+}

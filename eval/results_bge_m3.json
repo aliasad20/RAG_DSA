@@ -1,0 +1,102 @@
+{
+ "questions": 68,
+ "off_topic_questions": 12,
+ "recall_at_k": {
+  "1": 0.75,
+  "3": 0.8382352941176471,
+  "5": 0.9117647058823529,
+  "10": 0.9558823529411765
+ },
+ "mrr_at_10": 0.8096988795518207,
+ "median_search_ms": 304.4548467732966,
+ "in_domain_top_score": {
+  "min": 0.5275685730863572,
+  "median": 0.6410042692290141,
+  "max": 0.7144017555201911
+ },
+ "off_topic_top_score": {
+  "min": 0.3458284468861236,
+  "median": 0.47249358398342634,
+  "max": 0.516891683433492
+ },
+ "current_threshold": 0.35,
+ "threshold_sweep": [
+  {
+   "threshold": 0.3,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.0
+  },
+  {
+   "threshold": 0.35,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.08333333333333333
+  },
+  {
+   "threshold": 0.4,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.16666666666666666
+  },
+  {
+   "threshold": 0.45,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.4166666666666667
+  },
+  {
+   "threshold": 0.5,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.6666666666666666
+  },
+  {
+   "threshold": 0.55,
+   "in_domain_answered": 0.9705882352941176,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.6,
+   "in_domain_answered": 0.8088235294117647,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.65,
+   "in_domain_answered": 0.38235294117647056,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.7,
+   "in_domain_answered": 0.04411764705882353,
+   "off_topic_refused": 1.0
+  }
+ ],
+ "misses_at_5": [
+  {
+   "question": "How do I work out big O of nested loops?",
+   "rank": null,
+   "top_result": "L6. Next Greater Element - II | Stack and Queue Playlist"
+  },
+  {
+   "question": "What is the fewest hops needed to reach the end of an array?",
+   "rank": 6,
+   "top_result": "G-39. Minimum Multiplications to Reach End"
+  },
+  {
+   "question": "How do I do an inorder walk of a tree with O(1) extra space using threads?",
+   "rank": 7,
+   "top_result": "L6. Inorder Traversal of Binary Tree | C++ | Java | Code Explanation"
+  },
+  {
+   "question": "Which edges disconnect a graph when removed?",
+   "rank": null,
+   "top_result": "G-49. Number of Operations to Make Network Connected - DSU"
+  },
+  {
+   "question": "Maximum stock profit when I must wait a day after selling",
+   "rank": null,
+   "top_result": "DP 35. Best Time to Buy and Sell Stock | DP on Stocks 🔥"
+  },
+  {
+   "question": "What is the difference between memoization and tabulation?",
+   "rank": 10,
+   "top_result": "DP 8. Grid Unique Paths | Learn Everything about DP on Grids | ALL TECHNIQUES 🔥"
+  }
+ ]
+}

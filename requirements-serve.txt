@@ -1,0 +1,6 @@
+# Only what the answer server needs. The browser computes embeddings, so no PyTorch.
+fastapi
+uvicorn
+qdrant-client
+groq
+python-dotenv

@@ -1,0 +1,102 @@
+{
+ "questions": 68,
+ "off_topic_questions": 12,
+ "recall_at_k": {
+  "1": 0.8088235294117647,
+  "3": 0.9117647058823529,
+  "5": 0.9117647058823529,
+  "10": 0.9558823529411765
+ },
+ "mrr_at_10": 0.8644957983193278,
+ "median_search_ms": 502.0269397646189,
+ "in_domain_top_score": {
+  "min": 0.41814825,
+  "median": 0.6192833449999999,
+  "max": 0.7435554
+ },
+ "off_topic_top_score": {
+  "min": 0.16482192,
+  "median": 0.244940205,
+  "max": 0.35328576
+ },
+ "current_threshold": 0.4,
+ "threshold_sweep": [
+  {
+   "threshold": 0.3,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.9166666666666666
+  },
+  {
+   "threshold": 0.35,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 0.9166666666666666
+  },
+  {
+   "threshold": 0.4,
+   "in_domain_answered": 1.0,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.45,
+   "in_domain_answered": 0.9852941176470589,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.5,
+   "in_domain_answered": 0.9558823529411765,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.55,
+   "in_domain_answered": 0.8382352941176471,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.6,
+   "in_domain_answered": 0.6176470588235294,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.65,
+   "in_domain_answered": 0.3088235294117647,
+   "off_topic_refused": 1.0
+  },
+  {
+   "threshold": 0.7,
+   "in_domain_answered": 0.10294117647058823,
+   "off_topic_refused": 1.0
+  }
+ ],
+ "misses_at_5": [
+  {
+   "question": "How do I find the largest sum of a contiguous part of an array?",
+   "rank": null,
+   "top_result": "Longest Subarray with sum K | Brute - Better - Optimal | Generate Subarrays"
+  },
+  {
+   "question": "How do I get the next lexicographically greater arrangement of an array?",
+   "rank": null,
+   "top_result": "Find Second Largest Element in Array | Remove duplicates from Sorted Array | Arrays Intro Video"
+  },
+  {
+   "question": "Single source shortest paths when edges can have negative weights",
+   "rank": 7,
+   "top_result": "G-42. Floyd Warshall Algorithm"
+  },
+  {
+   "question": "Shortest paths between every pair of vertices",
+   "rank": null,
+   "top_result": "G-27. Shortest Path in Directed Acyclic Graph - Topological Sort"
+  },
+  {
+   "question": "Which edges disconnect a graph when removed?",
+   "rank": 6,
+   "top_result": "G-49. Number of Operations to Make Network Connected - DSU"
+  },
+  {
+   "question": "Maximum stock profit when I must wait a day after selling",
+   "rank": 7,
+   "top_result": "DP 35. Best Time to Buy and Sell Stock | DP on Stocks 🔥"
+  }
+ ]
+}
