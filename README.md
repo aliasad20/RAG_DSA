@@ -1,4 +1,6 @@
-# YouTube Lecture RAG
+# DSA Lecture RAG
+
+**Live site: [ragdsatutor.netlify.app](https://ragdsatutor.netlify.app)**
 
 Search what is said across a YouTube playlist and jump to the moment an idea is explained, or get a short written answer that cites those moments. Built over a 315-video, 114-hour DSA course.
 
