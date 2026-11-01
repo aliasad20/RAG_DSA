@@ -122,6 +122,16 @@ class AskGuardTests(unittest.TestCase):
         self.assertEqual(result["answer"], "Set arr[2] to zero [1].")
         self.assertEqual(len(result["sources"]), 1)
 
+    def test_code_is_left_alone(self):
+        reply = "Use `x = [1]` here [2]:\n```python\nitems = [1, 2]\nfirst = [2]\n```\nDone [1]."
+        result, _ = self.ask([hit(1), hit(2)], llm_reply=reply)
+        self.assertEqual(result["answer"], "Use `x = [1]` here [1]:\n```python\nitems = [1, 2]\nfirst = [2]\n```\nDone [2].")
+        self.assertEqual([s["title"] for s in result["sources"]], ["Video 2", "Video 1"])
+
+    def test_citation_only_inside_code_is_refused(self):
+        result, _ = self.ask([hit(1)], llm_reply="Trust me: `x = [1]`.")
+        self.assertEqual(result, {"answer": REFUSAL, "sources": []})
+
     def test_answer_without_citations_is_refused(self):
         result, _ = self.ask([hit(1)], llm_reply="Trust me, this is how it works.")
         self.assertEqual(result, {"answer": REFUSAL, "sources": []})
@@ -167,6 +177,13 @@ class AskStreamTests(unittest.TestCase):
     def test_array_index_split_across_pieces_is_kept(self):
         events, _ = self.stream([hit(1), hit(2)], ["Set arr", "[2", "] to zero [", "1]."])
         self.assertEqual(self.typed(events), "Set arr[2] to zero [1].")
+
+    def test_code_block_split_across_pieces_stays_intact(self):
+        pieces = ["Like this [1]:\n", "```py\nitems = [", "1, 2]\n", "first = [2]\n``", "`\nDone [", "2]."]
+        events, _ = self.stream([hit(1), hit(2)], pieces)
+        expected = "Like this [1]:\n```py\nitems = [1, 2]\nfirst = [2]\n```\nDone [2]."
+        self.assertEqual(self.typed(events), expected)
+        self.assertEqual(events[-1]["answer"], expected)
 
     def test_refusal_and_uncited_reply_are_never_typed(self):
         for pieces in ([REFUSAL[:9], REFUSAL[9:]], ["Trust me, ", "this works."]):

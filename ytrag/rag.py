@@ -1,7 +1,7 @@
 """Question -> retrieved chunks -> grounded LLM answer with timestamp citations."""
 
 import re
-from collections.abc import Iterator
+from collections.abc import Callable, Iterator
 
 from ytrag.config import (
     GEMINI_API_KEY,
@@ -19,19 +19,31 @@ SYSTEM_PROMPT = f"""Answer the question using ONLY the numbered transcript excer
 The transcripts are auto-generated, so read past obvious transcription mistakes.
 - If the excerpts don't contain the answer, reply exactly: "{REFUSAL}"
 - Cite excerpts inline with plain square brackets: [1], [2]. Every claim needs a citation.
-- Reply in the same language and script as the question (a Hinglish question written in English letters gets a Hinglish answer in English letters).
-- Keep it concise (under ~6 sentences). Never invent timestamps or video titles."""
+- Format the answer in Markdown: short paragraphs, `-` or numbered lists for steps and comparisons, **bold** for key terms, backticks for code and variable names. Use a `###` heading only when the answer has clearly separate parts.
+- Put citations in the text, never inside code. Never use the word "excerpt" in the answer; readers only see the citation numbers.
+- Keep it concise (under ~6 sentences). Never invent timestamps or video titles.
+- Write every sentence in the same language and script as the question, even when the excerpts are in another language. A Hinglish question written in English letters gets a fully Hinglish answer in English letters."""
 
 
 # Models also write 【2】, 【2†L1】 and [1, 2]. A plain [n] straight after a word is code (arr[1]).
 _CITATION_FORMS = re.compile(r"\s*(?:【|(?<![\w)])\[)\s*(\d+(?:\s*[,，]\s*\d+)*)(?:†[^\]】]*)?\s*[\]】]")
 _CITATION = re.compile(r"(?<![\w)])\[(\d+)\]")
+# Code can hold lists like [1, 2], which are not citations. A fence being written runs to the end.
+_CODE = re.compile(r"(```.*?(?:```|$)|`[^`\n]*`)", re.DOTALL)
 # End of a reply still being written: a citation may be cut off inside its brackets.
 _UNFINISHED = re.compile(r"\s*(?:[\[【][^\]】]*)?$")
 
 
+def _outside_code(change: Callable[[str], str], text: str) -> str:
+    parts = _CODE.split(text)
+    parts[0::2] = [change(part) for part in parts[0::2]]
+    return "".join(parts)
+
+
 def _normalize_citations(text: str) -> str:
-    return _CITATION_FORMS.sub(lambda m: " " + "".join(f"[{n}]" for n in re.findall(r"\d+", m[1])), text).strip()
+    return _outside_code(
+        lambda part: _CITATION_FORMS.sub(lambda m: " " + "".join(f"[{n}]" for n in re.findall(r"\d+", m[1])), part), text
+    ).strip()
 
 
 def retrieve(
@@ -82,9 +94,10 @@ def _user_prompt(question: str, hits: list[tuple[Chunk, float]]) -> str:
 def _cite(text: str, hits: list[tuple[Chunk, float]]) -> tuple[str, list[dict]]:
     """Keep only the sources the model actually cited, renumbered 1..N by first use."""
     text = _normalize_citations(text)
-    used = list(dict.fromkeys(int(n) for n in _CITATION.findall(text) if 1 <= int(n) <= len(hits)))
+    prose = "".join(_CODE.split(text)[0::2])
+    used = list(dict.fromkeys(int(n) for n in _CITATION.findall(prose) if 1 <= int(n) <= len(hits)))
     remap = {old: new for new, old in enumerate(used, 1)}
-    text = _CITATION.sub(lambda m: f"[{remap[int(m[1])]}]" if int(m[1]) in remap else "", text)
+    text = _outside_code(lambda part: _CITATION.sub(lambda m: f"[{remap[int(m[1])]}]" if int(m[1]) in remap else "", part), text)
     sources = [{"title": hits[i - 1][0].title, "timestamp": hits[i - 1][0].timestamp, "url": hits[i - 1][0].url} for i in used]
     return text, sources
 

@@ -1,3 +1,4 @@
+import { CITATION, hideUnfinished, renderMarkdown } from "./markdown.js";
 import { embedQuestion, prepare, search, toMoment } from "./search.js";
 
 const { useEffect, useRef, useState } = React;
@@ -25,30 +26,6 @@ function highlight(text, query) {
   if (!terms.length) return text;
   const parts = text.split(new RegExp(`(${terms.join("|")})`, "giu"));
   return parts.map((part, i) => (i % 2 ? html`<mark key=${i}>${part}</mark>` : part));
-}
-
-// The LLM writes light markdown and [n] citations. Built as elements, never as raw HTML.
-function renderAnswer(text, sources, onPick) {
-  return text.split(/(\[\d+\]|\*\*[^*\n]+\*\*|\*[^*\n]+\*|`[^`\n]+`)/g).map((part, i) => {
-    const citation = part.match(/^\[(\d+)\]$/);
-    if (citation && sources[citation[1] - 1]) {
-      const source = sources[citation[1] - 1];
-      return html`<button key=${i} type="button" className="cite" title=${`${source.title} at ${source.timestamp}`} onClick=${() => onPick(source)}>${citation[1]}</button>`;
-    }
-    if (part.startsWith("**")) return html`<strong key=${i}>${part.slice(2, -2)}</strong>`;
-    if (part.startsWith("*") && part.length > 2) return html`<em key=${i}>${part.slice(1, -1)}</em>`;
-    if (part.startsWith("`")) return html`<code key=${i}>${part.slice(1, -1)}</code>`;
-    return part;
-  });
-}
-
-// A half-revealed citation or bold marker stays hidden until the rest of it is on screen.
-function hideUnfinished(text) {
-  let out = text.replace(/\[\d*$/, "");
-  for (const marker of ["**", "`"]) {
-    if ((out.split(marker).length - 1) % 2) out = out.slice(0, out.lastIndexOf(marker));
-  }
-  return out;
 }
 
 // Groq can finish an answer in under a second, so the text is revealed at a readable pace.
@@ -230,7 +207,7 @@ function App() {
   const typing = busy || typed.length < fullAnswer.length;
   const shownAnswer = typing ? hideUnfinished(typed) : fullAnswer;
   // Numbered by first use, so the highest citation on screen says how many sources to list.
-  const citedSoFar = Math.max(0, ...[...shownAnswer.matchAll(/\[(\d+)\]/g)].map((m) => Number(m[1])));
+  const citedSoFar = Math.max(0, ...[...shownAnswer.matchAll(CITATION)].map((m) => Number(m[1])));
   const shownMoments = fullAnswer && typing ? moments.slice(0, citedSoFar) : moments;
 
   return html`<div className=${"page" + (started ? " started" : "")}>
@@ -267,14 +244,15 @@ function App() {
     ${state.phase === "error" && html`<p className="error" role="alert">${state.message}</p>`}
     ${nothing && html`<p className="status">Nothing in these lectures looks like a good match. Try describing it another way.</p>`}
 
-    ${fullAnswer && html`<section className=${"answer" + (state.grounded ? "" : " plain") + (typing ? " typing" : "")} aria-busy=${typing}>
-      <p>${renderAnswer(shownAnswer, moments, setActive)}</p>
-      ${state.grounded && !typing && html`<p className="note">Written by AI from the lecture transcripts, which can contain errors. Check the sources.</p>`}
-    </section>`}
-
-    ${shownMoments.length > 0 && html`<div className="workspace">
-      <${MomentList} moments=${shownMoments} active=${active} onPick=${setActive} query=${state.question} numbered=${Boolean(state.answer)} />
-      <aside className="watch"><${Player} moment=${active} /></aside>
+    ${(fullAnswer || moments.length > 0) && html`<div className=${"results" + (moments.length ? "" : " solo")}>
+      <div className="results-main">
+        ${fullAnswer && html`<section className=${"answer" + (state.grounded ? "" : " plain") + (typing ? " typing" : "")} aria-busy=${typing}>
+          <div className="md">${renderMarkdown(shownAnswer, moments, setActive)}</div>
+          ${state.grounded && !typing && html`<p className="note">Written by AI from the lecture transcripts, which can contain errors. Check the sources.</p>`}
+        </section>`}
+        ${shownMoments.length > 0 && html`<${MomentList} moments=${shownMoments} active=${active} onPick=${setActive} query=${state.question} numbered=${Boolean(state.answer)} />`}
+      </div>
+      ${moments.length > 0 && html`<aside className="watch"><${Player} moment=${active} /></aside>`}
     </div>`}
 
     <footer>
